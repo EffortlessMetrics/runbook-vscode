@@ -1,0 +1,47 @@
+{
+  "name": "runbook-vscode",
+  "displayName": "Runbook",
+  "description": "VS Code bridge for the Runbook control surface (Claude Code agent loop)",
+  "version": "0.1.0",
+  "publisher": "runbook-rs",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:runbook.connect",
+    "onCommand:runbook.disconnect",
+    "onCommand:runbook.dispatchTest"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "runbook.connect",
+        "title": "Runbook: Connect to daemon"
+      },
+      {
+        "command": "runbook.disconnect",
+        "title": "Runbook: Disconnect from daemon"
+      },
+      {
+        "command": "runbook.dispatchTest",
+        "title": "Runbook: Dispatch test prompt"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "ws": "^8.17.0"
+  }
+}
