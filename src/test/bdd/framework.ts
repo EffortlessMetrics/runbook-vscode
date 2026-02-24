@@ -36,32 +36,53 @@ export function parseFeatureText(text: string): GherkinFeature {
   const descLines: string[] = [];
   const scenarios: GherkinScenario[] = [];
   let current: GherkinScenario | null = null;
+  let backgroundSteps: GherkinStep[] = [];
+  let inBackground = false;
 
   for (const line of lines) {
+    // Skip comments
+    if (line.trim().startsWith('#')) { continue; }
+
     const featureMatch = line.match(FEATURE_KW);
     if (featureMatch) {
       featureName = featureMatch[1].trim();
+      inBackground = false;
+      continue;
+    }
+
+    // Background: — steps here are prepended to every Scenario
+    const backgroundMatch = line.match(/^\s*Background:\s*(.*)$/);
+    if (backgroundMatch) {
+      inBackground = true;
+      current = null;
       continue;
     }
 
     const scenarioMatch = line.match(SCENARIO_KW);
     if (scenarioMatch) {
-      current = { name: scenarioMatch[1].trim(), steps: [] };
+      inBackground = false;
+      current = { name: scenarioMatch[1].trim(), steps: [...backgroundSteps] };
       scenarios.push(current);
       continue;
     }
 
     const stepMatch = line.match(STEP_KW);
-    if (stepMatch && current) {
-      current.steps.push({
+    if (stepMatch) {
+      const step: GherkinStep = {
         keyword: stepMatch[1] as GherkinStep['keyword'],
         text: stepMatch[2].trim()
-      });
+      };
+
+      if (inBackground) {
+        backgroundSteps.push(step);
+      } else if (current) {
+        current.steps.push(step);
+      }
       continue;
     }
 
-    // Collect description lines between Feature and first Scenario
-    if (featureName && !current && line.trim() && !line.trim().startsWith('#')) {
+    // Collect description lines between Feature and first Scenario/Background
+    if (featureName && !current && !inBackground && line.trim()) {
       descLines.push(line.trim());
     }
   }

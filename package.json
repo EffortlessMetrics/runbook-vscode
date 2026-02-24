@@ -22,6 +22,16 @@
           "type": "string",
           "default": "ws://127.0.0.1:29381/ws",
           "description": "WebSocket URL for the Runbook daemon."
+        },
+        "runbook.escWhenPending": {
+          "type": "string",
+          "default": "cancel_only",
+          "enum": ["cancel_only", "cancel_and_passthrough"],
+          "enumDescriptions": [
+            "Esc clears the pending prompt without sending Esc to the terminal (safe default).",
+            "Esc clears the pending prompt AND sends Esc to the terminal."
+          ],
+          "description": "Controls Esc behavior when a prompt is pending (loaded). 'cancel_only' swallows Esc locally; 'cancel_and_passthrough' also forwards Esc to Claude."
         }
       }
     },
