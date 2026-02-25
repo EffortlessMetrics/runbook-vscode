@@ -1,0 +1,114 @@
+
+> runbook-vscode@0.1.0 test:bdd
+> npm run compile && node ./dist/test/runBdd.js
+
+
+> runbook-vscode@0.1.0 compile
+> tsc -p ./
+
+- Resolving version...
+Γ£ö Validated version: 1.109.5
+Γ£ö Found existing install in H:\Code\Runbook\runbook-vscode\.vscode-test\vscode-win32-x64-archive-1.109.5
+(node:150368) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+[main 2026-02-25T00:03:14.363Z] update#setState disabled
+[main 2026-02-25T00:03:14.364Z] update#ctor - updates are disabled by the environment
+Started local extension host with pid 636600.
+MCP Registry configured: https://api.mcp.github.com
+Loading development extension at h:\Code\Runbook\runbook-vscode
+Settings Sync: Account status changed from uninitialized to unavailable
+[0m[0m
+[0m  Feature: Command Execution[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  [32m  Γ£ö[0m[90m Scenario: Explicitly dispatching a test payload[0m[31m (165ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Disconnecting and reconnecting manually[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+[0m  Feature: Extension Configuration[0m
+  [32m  Γ£ö[0m[90m Scenario: Extension commands are registered[0m
+  [32m  Γ£ö[0m[90m Scenario: Default daemon URL is configured[0m
+[0m  Feature: Connection Lifecycle[0m
+  [32m  Γ£ö[0m[90m Scenario: Extension activates and registers all commands[0m
+  [32m  Γ£ö[0m[90m Scenario: Default configuration values exist out of the box[0m
+  [32m  Γ£ö[0m[90m Scenario: Status bar item is present after activation[0m
+  [32m  Γ£ö[0m[90m Scenario: Extension operates without daemon connection[0m[31m (151ms)[0m
+[0m  Feature: Context Collection[0m
+  [32m  Γ£ö[0m[90m Scenario: Workspace path is exposed[0m[31m (106ms)[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  [32m  Γ£ö[0m[90m Scenario: Active terminal context is reported[0m[31m (259ms)[0m
+[0m  Feature: Degraded Mode[0m
+  [32m  Γ£ö[0m[90m Scenario: Dispatch works without daemon connection[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Terminal cycling works without daemon connection[0m[31m (303ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Control sequences work without daemon connection[0m[31m (153ms)[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  [32m  Γ£ö[0m[90m Scenario: Focus works without daemon connection[0m[31m (259ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Multiple dispatch without daemon does not accumulate errors[0m[31m (152ms)[0m
+[0m  Feature: Prompt Dispatch Loop[0m
+  [32m  Γ£ö[0m[90m Scenario: ARMED prompt terminal exists before dispatch[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Dispatching text to a terminal[0m[31m (153ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Dispatching Ctrl+C interrupt[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Dispatching Esc to cancel[0m[31m (153ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Dispatching Enter to confirm[0m[31m (153ms)[0m
+[0m  Feature: Jump Gates[0m
+  [32m  Γ£ö[0m[90m Scenario: HTTPS URI parses correctly[0m
+  [32m  Γ£ö[0m[90m Scenario: File URI parses correctly[0m
+  [32m  Γ£ö[0m[90m Scenario: Malformed URI does not crash[0m
+  [32m  Γ£ö[0m[90m Scenario: Receipt paths resolve to valid file URIs[0m
+[0m  Feature: Terminal Navigation[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  [32m  Γ£ö[0m[90m Scenario: Creating multiple terminals and verifying count[0m[31m (458ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: All created terminals are independently addressable[0m[31m (322ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Focusing a specific terminal by name[0m[31m (281ms)[0m
+[0m  Feature: Pending Prompt Contract[0m
+  [32m  Γ£ö[0m[90m Scenario: Enter with no pending prompt sends bare Enter[0m[31m (164ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Enter with pending prompt sends prompt text then clears buffer[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Esc with no pending prompt passes through to terminal[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Esc with pending prompt cancels without terminal side-effect (cancel_only)[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Esc with pending prompt cancels AND passes through (cancel_and_passthrough)[0m[31m (153ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Ctrl+C always interrupts regardless of pending state[0m[31m (154ms)[0m
+[0m  Feature: Protocol Fidelity[0m
+  [32m  Γ£ö[0m[90m Scenario: ClientHello has correct fields[0m
+  [32m  Γ£ö[0m[90m Scenario: VscodeCommand round-trips for send_text[0m
+  [32m  Γ£ö[0m[90m Scenario: VscodeCommand round-trips for send_sequence[0m
+  [32m  Γ£ö[0m[90m Scenario: Context update preserves snake_case[0m
+  [32m  Γ£ö[0m[90m Scenario: Unknown message types do not crash[0m
+Runbook websocket error Error: connect ECONNREFUSED 127.0.0.1:29381
+	at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+  [32m  Γ£ö[0m[90m Scenario: Malformed JSON does not crash[0m
+[0m  Feature: Terminal Management[0m
+  [32m  Γ£ö[0m[90m Scenario: Creating a single terminal[0m[31m (154ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Creating multiple terminals preserves all of them[0m[31m (461ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Terminals with duplicate names are individually tracked[0m[31m (317ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Disposing a terminal removes it from the list[0m[31m (364ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Sending text to a specific terminal by name[0m[31m (154ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Sending text without newline[0m[31m (154ms)[0m
+[0m  Feature: Terminal Edge Cases[0m
+  [31m  1) Scenario: Cycling terminals when none exist[0m
+  [32m  Γ£ö[0m[90m Scenario: Focusing out of bounds[0m[31m (152ms)[0m
+  [32m  Γ£ö[0m[90m Scenario: Sending sequences to non-existent terminals[0m
+  [32m  Γ£ö[0m[90m Scenario: Unknown control sequences default to literal payload[0m[31m (164ms)[0m
+[92m [0m[32m 48 passing[0m[90m (12s)[0m
+[31m  1 failing[0m
+[0m  1) Feature: Terminal Edge Cases
+       Scenario: Cycling terminals when none exist:
+[0m[31m     Error: command 'runbook.cycleTerminal1' not found[0m[90m
+      at pit.n (vscode-file://vscode-app/h:/Code/Runbook/runbook-vscode/.vscode-test/vscode-win32-x64-archive-1.109.5/072586267e/resources/app/out/vs/workbench/workbench.desktop.main.js:1354:3892)
+      at pit.executeCommand (vscode-file://vscode-app/h:/Code/Runbook/runbook-vscode/.vscode-test/vscode-win32-x64-archive-1.109.5/072586267e/resources/app/out/vs/workbench/workbench.desktop.main.js:1354:3824)
+[0m
+Error: 1 BDD tests failed.
+	at h:\Code\Runbook\runbook-vscode\dist\test\bdd\index.js:89:24
+	at done (h:\Code\Runbook\runbook-vscode\node_modules\mocha\lib\mocha.js:1000:7)
+[main 2026-02-25T00:03:27.916Z] Extension host with pid 636600 exited with code: 0, signal: unknown.
+Exit code:   1
+Failed to run BDD tests TestRunFailedError: Test run failed with code 1
+    at ChildProcess.onProcessClosed (H:\Code\Runbook\runbook-vscode\node_modules\@vscode\test-electron\out\runTest.js:110:24)
+    at ChildProcess.emit (node:events:508:20)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12) {
+  code: 1,
+  signal: undefined
+}
