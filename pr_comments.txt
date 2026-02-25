@@ -1,0 +1,326 @@
+author:	gemini-code-assist
+association:	none
+edited:	false
+status:	none
+--
+## Summary of Changes
+
+Hello @EffortlessSteven, I'm Gemini Code Assist[^1]! I'm currently reviewing this pull request and will post my feedback shortly. In the meantime, here's a summary to help you and other reviewers quickly get up to speed!
+
+This pull request focuses on solidifying the foundational implementation of the Runbook VS Code extension as a strict actuator, driven by a defined protocol with the daemon. It enhances session tracking, improves portability, and ensures testing confidence through comprehensive test suites.
+
+### Highlights
+
+* **Pure Actuator Logic**: The extension now operates as a 'dumb' actuator, executing commands from the daemon without conditional logic.
+* **Protocol V1 Freeze**: The extension adopted the snake_case V1 protocol with cross-language examples for schema consensus.
+* **Session Tracking**: The extension now automatically injects a session tag into new Claude terminal sessions for telemetry.
+* **Handshake Gating**: The WebSocket now awaits a hello_ack message before marking the extension as fully connected.
+* **Portability**: The extension now uses sendText('', true) for sending the Enter sequence, improving shell compatibility.
+* **Testing Confidence**: The extension's Mocha Unit and BDD integration suites were overhauled to match the new deterministic protocol behaviors.
+
+<details>
+<summary><b>Changelog</b></summary>
+
+* **.editorconfig**
+    * Added .editorconfig file to enforce consistent code style.
+* **.github/pull_request_template.md**
+    * Added a pull request template to standardize PR submissions.
+* **.github/settings.yml**
+    * Added settings.yml to configure repository settings and labels.
+* **.gitignore**
+    * Updated .gitignore to exclude various logs, caches, and build outputs.
+* **.vscode/extensions.json**
+    * Added extensions.json to recommend the oxc.oxc-vscode extension.
+* **.vscode/launch.json**
+    * Added launch.json to configure debugging and testing launch configurations.
+* **.vscode/tasks.json**
+    * Added tasks.json to define build and watch tasks.
+* **package.json**
+    * Modified package.json to update dependencies, scripts, activation events, and contribute a configuration section for the daemon URL.
+* **src/context/index.ts**
+    * Added ContextCollector class to report workspace path and git branch telemetry.
+* **src/extension.ts**
+    * Modified extension.ts to implement pure actuator logic, handle vscode_command messages, and manage terminal commands.
+* **src/fixtures/protocol/v1/client_hello.json**
+    * Added client_hello.json fixture for protocol v1 client hello message.
+* **src/fixtures/protocol/v1/hello_ack.json**
+    * Added hello_ack.json fixture for protocol v1 hello ack message.
+* **src/fixtures/protocol/v1/hook_event.json**
+    * Added hook_event.json fixture for protocol v1 hook event message.
+* **src/fixtures/protocol/v1/render.json**
+    * Added render.json fixture for protocol v1 render message.
+* **src/fixtures/protocol/v1/vscode_command_cycle_terminal.json**
+    * Added vscode_command_cycle_terminal.json fixture for protocol v1 cycle terminal command.
+* **src/fixtures/protocol/v1/vscode_command_focus_terminal.json**
+    * Added vscode_command_focus_terminal.json fixture for protocol v1 focus terminal command.
+* **src/fixtures/protocol/v1/vscode_command_open_uri.json**
+    * Added vscode_command_open_uri.json fixture for protocol v1 open URI command.
+* **src/fixtures/protocol/v1/vscode_command_reveal_receipt.json**
+    * Added vscode_command_reveal_receipt.json fixture for protocol v1 reveal receipt command.
+* **src/fixtures/protocol/v1/vscode_command_send_sequence.json**
+    * Added vscode_command_send_sequence.json fixture for protocol v1 send sequence command.
+* **src/fixtures/protocol/v1/vscode_command_send_text.json**
+    * Added vscode_command_send_text.json fixture for protocol v1 send text command.
+* **src/fixtures/protocol/v1/vscode_command_start_claude_session.json**
+    * Added vscode_command_start_claude_session.json fixture for protocol v1 start Claude session command.
+* **src/fixtures/protocol/v1/vscode_telemetry.json**
+    * Added vscode_telemetry.json fixture for protocol v1 vscode telemetry message.
+* **src/jumpgates/index.ts**
+    * Added jumpgates/index.ts to implement openUri and revealReceipt functions.
+* **src/protocol/index.ts**
+    * Added protocol/index.ts to define protocol v1 types and interfaces.
+* **src/terminals/controller.ts**
+    * Added terminals/controller.ts to manage terminal selection, cycling, and text dispatch.
+* **src/test/bdd/features/commands.feature**
+    * Added commands.feature to test command execution.
+* **src/test/bdd/features/configuration.feature**
+    * Added configuration.feature to test extension configuration.
+* **src/test/bdd/features/connection.feature**
+    * Added connection.feature to test connection lifecycle.
+* **src/test/bdd/features/context.feature**
+    * Added context.feature to test context collection.
+* **src/test/bdd/features/cycling_math.feature**
+    * Added cycling_math.feature to test terminal cycling math.
+* **src/test/bdd/features/degraded.feature**
+    * Added degraded.feature to test degraded mode functionality.
+* **src/test/bdd/features/dispatch.feature**
+    * Added dispatch.feature to test prompt dispatch loop.
+* **src/test/bdd/features/jumpgates.feature**
+    * Added jumpgates.feature to test jump gate functionality.
+* **src/test/bdd/features/navigation.feature**
+    * Added navigation.feature to test terminal navigation.
+* **src/test/bdd/features/protocol.feature**
+    * Added protocol.feature to test protocol fidelity.
+* **src/test/bdd/features/sequences.feature**
+    * Added sequences.feature to test sequence dispatch.
+* **src/test/bdd/features/terminal.feature**
+    * Added terminal.feature to test terminal management.
+* **src/test/bdd/features/terminal_edges.feature**
+    * Added terminal_edges.feature to test terminal edge cases.
+* **src/test/bdd/features/transport.feature**
+    * Added transport.feature to test transport reconnection.
+* **src/test/bdd/framework.ts**
+    * Added bdd/framework.ts to provide a lightweight Gherkin parser and step registry.
+* **src/test/bdd/index.ts**
+    * Added bdd/index.ts to run BDD tests using Mocha.
+* **src/test/bdd/steps/all.steps.ts**
+    * Added bdd/steps/all.steps.ts to define step definitions for BDD tests.
+* **src/test/fakeDaemon.ts**
+    * Added fakeDaemon.ts to simulate a daemon for manual testing.
+* **src/test/runBdd.ts**
+    * Added runBdd.ts to run BDD tests.
+* **src/test/runTest.ts**
+    * Added runTest.ts to run unit tests.
+* **src/test/suite/connection.test.ts**
+    * Added suite/connection.test.ts to test connection and status.
+* **src/test/suite/dispatch.test.ts**
+    * Added suite/dispatch.test.ts to test dispatch and commands.
+* **src/test/suite/extension.test.ts**
+    * Added suite/extension.test.ts to test extension presence and terminal listing.
+* **src/test/suite/index.ts**
+    * Added suite/index.ts to configure and run unit tests.
+* **src/test/suite/protocol.test.ts**
+    * Added suite/protocol.test.ts to test protocol types.
+* **src/test/suite/terminal.test.ts**
+    * Added suite/terminal.test.ts to test terminal controller.
+* **src/transport/daemon.ts**
+    * Added transport/daemon.ts to manage the WebSocket connection to the daemon.
+</details>
+
+<details>
+<summary><b>Activity</b></summary>
+
+* The extension was updated to function as a pure actuator, executing commands from the daemon without conditional logic.
+* The snake_case V1 protocol was adopted, with cross-language examples for schema consensus.
+* Session tracking was added to automatically inject a session tag into new Claude terminal sessions for telemetry.
+* The WebSocket now awaits a hello_ack message before marking the extension as fully connected.
+* sendText('', true) is now used for sending the Enter sequence, improving shell compatibility.
+* Mocha Unit and BDD integration suites were overhauled to match the new deterministic protocol behaviors.
+</details>
+
+<details>
+<summary><b>Using Gemini Code Assist</b></summary>
+<br>
+
+The full guide for Gemini Code Assist can be found on our [documentation page](https://developers.google.com/gemini-code-assist/docs/review-github-code), here are some quick tips.
+
+<b>Invoking Gemini</b>
+
+You can request assistance from Gemini at any point by creating a comment using either `/gemini <command>` or `@gemini-code-assist <command>`. Below is a summary of the supported commands on the current page.
+
+Feature | Command | Description
+--- | --- | ---
+Code Review | `/gemini review` | Performs a code review for the current pull request in its current state.
+Pull Request Summary | `/gemini summary` | Provides a summary of the current pull request in its current state.
+Comment | @gemini-code-assist | Responds in comments when explicitly tagged, both in pull request comments and review comments.
+Help | `/gemini help` | Displays a list of available commands.
+
+<b>Customization</b>
+
+To customize Gemini Code Assist for GitHub experience, repository maintainers can create a configuration file and/or provide a custom code review style guide (such as PEP-8 for Python) by creating and adding files to a `.gemini/` folder in the base of the repository. Detailed instructions can be found [here](https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github).
+
+<b>Limitations & Feedback</b>
+
+Gemini Code Assist may make mistakes. Please leave feedback on any instances where its feedback is incorrect or counter productive. You can react with :thumbsup: and :thumbsdown: on @gemini-code-assist comments. If you're interested in giving your feedback about your experience with Gemini Code Assist for Github and other Google products, sign up [here](https://google.qualtrics.com/jfe/form/SV_2cyuGuTWsEw84yG).
+
+<b>You can also get AI-powered code generation, chat, as well as code reviews directly in the IDE at no cost with the [Gemini Code Assist IDE Extension](https://cloud.google.com/products/gemini/code-assist).</b>
+</details>
+
+
+[^1]: Review the [Privacy Notices](https://policies.google.com/privacy), [Generative AI Prohibited Use Policy](https://policies.google.com/terms/generative-ai/use-policy), [Terms of Service](https://policies.google.com/terms), and learn how to configure Gemini Code Assist in GitHub [here](https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github). Gemini can make mistakes, so double check it and [use code with caution](https://support.google.com/legal/answer/13505487).
+
+--
+author:	chatgpt-codex-connector
+association:	none
+edited:	false
+status:	commented
+--
+
+### ≡ƒÆí Codex Review
+
+Here are some automated review suggestions for this pull request.
+
+**Reviewed commit:** `44d92e8a74`
+    
+
+<details> <summary>Γä╣∩╕Å About Codex in GitHub</summary>
+<br/>
+
+[Your team has set up Codex to review pull requests in this repo](http://chatgpt.com/codex/settings/general). Reviews are triggered when you
+- Open a pull request for review
+- Mark a draft as ready
+- Comment "@codex review".
+
+If Codex has suggestions, it will comment; otherwise it will react with ≡ƒæì.
+
+
+
+
+Codex can also answer questions or update the PR. Try commenting "@codex address that feedback".
+            
+</details>
+--
+author:	copilot-pull-request-reviewer
+association:	none
+edited:	false
+status:	commented
+--
+## Pull request overview
+
+Implements Phase 1 of the `runbook-vscode` extension as a deterministic ΓÇ£dumb actuatorΓÇ¥ that executes daemon commands, freezes protocol v1 fixtures, and adds handshake-gated WebSocket connection + telemetry/session tagging.
+
+**Changes:**
+- Introduces `DaemonClient` transport with hello/hello_ack handshake gating and exponential reconnect backoff.
+- Adds terminal control + session tagging (`RUNBOOK_SESSION_TAG`) and emits periodic `vscode_telemetry`.
+- Adds protocol v1 schema + JSON fixtures and overhauls unit + BDD test harness/features.
+
+### Reviewed changes
+
+Copilot reviewed 52 out of 54 changed files in this pull request and generated 7 comments.
+
+<details>
+<summary>Show a summary per file</summary>
+
+| File | Description |
+| ---- | ----------- |
+| test-out.txt | Adds captured BDD run output (including a failing assertion). |
+| src/transport/daemon.ts | New WebSocket client with handshake gating and reconnect logic. |
+| src/terminals/controller.ts | New terminal selection/cycling/sequence dispatch + session tagging + telemetry. |
+| src/extension.ts | Replaces prior WS logic with DaemonClient + deterministic command dispatch. |
+| src/context/index.ts | Adds workspace/git telemetry collection and periodic updates. |
+| src/jumpgates/index.ts | Adds URI open + receipt reveal command handlers. |
+| src/protocol/index.ts | Defines protocol v1 types (snake_case) and message union. |
+| src/fixtures/protocol/v1/client_hello.json | Adds canonical fixture for client hello. |
+| src/fixtures/protocol/v1/hello_ack.json | Adds canonical fixture for hello acknowledgement. |
+| src/fixtures/protocol/v1/render.json | Adds canonical fixture for daemon render state. |
+| src/fixtures/protocol/v1/hook_event.json | Adds canonical fixture for hook event payload. |
+| src/fixtures/protocol/v1/vscode_telemetry.json | Adds canonical fixture for telemetry payload (incl. session tags). |
+| src/fixtures/protocol/v1/vscode_command_send_text.json | Adds canonical fixture for send_text command. |
+| src/fixtures/protocol/v1/vscode_command_send_sequence.json | Adds canonical fixture for send_sequence command. |
+| src/fixtures/protocol/v1/vscode_command_focus_terminal.json | Adds canonical fixture for focus_terminal command. |
+| src/fixtures/protocol/v1/vscode_command_cycle_terminal.json | Adds canonical fixture for cycle_terminal command. |
+| src/fixtures/protocol/v1/vscode_command_open_uri.json | Adds canonical fixture for open_uri command. |
+| src/fixtures/protocol/v1/vscode_command_reveal_receipt.json | Adds canonical fixture for reveal_receipt command. |
+| src/fixtures/protocol/v1/vscode_command_start_claude_session.json | Adds canonical fixture for start_claude_session command. |
+| src/test/runTest.ts | Adds VS Code integration test runner entrypoint. |
+| src/test/runBdd.ts | Adds VS Code-hosted BDD runner entrypoint. |
+| src/test/suite/index.ts | Adds Mocha bootstrap that discovers `*.test.js` files. |
+| src/test/suite/extension.test.ts | Adds basic extension presence + terminal API smoke test. |
+| src/test/suite/connection.test.ts | Adds command/config/status activation tests. |
+| src/test/suite/dispatch.test.ts | Adds terminal sendText/control character dispatch smoke tests. |
+| src/test/suite/terminal.test.ts | Adds terminal cycling math + terminal API smoke tests. |
+| src/test/suite/protocol.test.ts | Adds protocol serialization/round-trip unit tests. |
+| src/test/fakeDaemon.ts | Adds manual fake daemon WebSocket server for local testing. |
+| src/test/bdd/index.ts | Adds custom BDD runner that generates Mocha suites from `.feature` files. |
+| src/test/bdd/framework.ts | Adds lightweight Gherkin parser + step registry. |
+| src/test/bdd/steps/all.steps.ts | Implements step definitions for terminal/transport/protocol scenarios. |
+| src/test/bdd/features/commands.feature | Adds BDD specs for running contributed commands. |
+| src/test/bdd/features/configuration.feature | Adds BDD specs for default configuration. |
+| src/test/bdd/features/connection.feature | Adds BDD specs for connection lifecycle expectations. |
+| src/test/bdd/features/context.feature | Adds BDD specs for telemetry/context collection. |
+| src/test/bdd/features/cycling_math.feature | Adds BDD specs for modular cycling arithmetic. |
+| src/test/bdd/features/degraded.feature | Adds BDD specs for offline/degraded behavior. |
+| src/test/bdd/features/dispatch.feature | Adds BDD specs for prompt dispatch loop mechanics. |
+| src/test/bdd/features/jumpgates.feature | Adds BDD specs for URI/receipt navigation parsing. |
+| src/test/bdd/features/navigation.feature | Adds BDD specs for terminal navigation/focus. |
+| src/test/bdd/features/protocol.feature | Adds BDD specs for protocol snake_case fidelity. |
+| src/test/bdd/features/sequences.feature | Adds BDD specs for named sequence mapping. |
+| src/test/bdd/features/terminal.feature | Adds BDD specs for terminal creation/disposal/text send. |
+| src/test/bdd/features/terminal_edges.feature | Adds BDD specs for terminal edge cases. |
+| src/test/bdd/features/transport.feature | Adds BDD specs for reconnect backoff behavior. |
+| package.json | Adds configuration contribution, test scripts, and new dev dependencies. |
+| .vscode/tasks.json | Adds build/watch tasks. |
+| .vscode/launch.json | Adds launch configs for extension + tests. |
+| .vscode/extensions.json | Adds workspace extension recommendations. |
+| .gitignore | Expands ignore patterns (including `.vscode-test/` and build artifacts). |
+| .github/settings.yml | Adds repo settings/labels/branch protection config. |
+| .github/pull_request_template.md | Adds PR template with checklist and manual CLA section. |
+| .editorconfig | Adds formatting defaults (2-space indent, LF, etc.). |
+</details>
+
+
+
+<details>
+<summary>Comments suppressed due to low confidence (8)</summary>
+
+**src/transport/daemon.ts:1**
+* Calling `disconnect()` will still trigger the WebSocket `close` handler, which calls `handleDisconnect()` and schedules a reconnect. That makes manual disconnect non-sticky and can also emit `disconnected` twice. Add an explicit `shouldReconnect`/`intentionalDisconnect` flag (or remove/guard the `close` listener during manual close) so `disconnect()` does not schedule reconnection.
+**src/transport/daemon.ts:1**
+* Calling `disconnect()` will still trigger the WebSocket `close` handler, which calls `handleDisconnect()` and schedules a reconnect. That makes manual disconnect non-sticky and can also emit `disconnected` twice. Add an explicit `shouldReconnect`/`intentionalDisconnect` flag (or remove/guard the `close` listener during manual close) so `disconnect()` does not schedule reconnection.
+**src/transport/daemon.ts:1**
+* Both `error` and `close` can fire for the same connection, causing duplicate `handleDisconnect()` calls (double `disconnected` emits and extra status churn). Make `handleDisconnect` idempotent per socket instance (e.g., compare against the current `this.ws`, track a connection id, or only handle disconnect on `close` and use `error` for logging).
+**src/transport/daemon.ts:1**
+* Method name `schemaReconnect` reads like a typo/misnomer (it schedules a reconnect). Consider renaming to `scheduleReconnect` (and update the call site) to make intent clearer.
+**src/test/bdd/steps/all.steps.ts:1**
+* BDD step logic maps `Enter` to a raw `\\r`, but `TerminalController.sendSequence('Enter')` now uses `sendText('', true)` for portability. The BDD steps/specs should be updated to match the new behavior; otherwise they encode the old contract and will drift from the implementation.
+**src/test/bdd/features/sequences.feature:1**
+* This feature asserts `Enter` maps to `\\r`, which conflicts with the updated implementation goal of using `sendText('', true)` for Enter semantics. Consider changing this scenario to assert the intended *API behavior* (execute newline) rather than a specific byte value for Enter.
+**test-out.txt:1**
+* Committing a raw test output capture (`test-out.txt`) is likely to become noisy/outdated and is usually better handled as a CI artifact rather than versioned source. Consider removing it from the repo and/or adding it to `.gitignore` if itΓÇÖs generated.
+**src/test/suite/extension.test.ts:1**
+* Tests should avoid showing UI notifications because it can slow down or interfere with headless/CI runs. Remove this call (or guard it behind an explicit debug flag) to keep the suite non-interactive.
+</details>
+
+
+
+---
+
+≡ƒÆí <a href="/EffortlessMetrics/runbook-vscode/new/main?filename=.github/instructions/*.instructions.md" class="Link--inTextBlock" target="_blank" rel="noopener noreferrer">Add Copilot custom instructions</a> for smarter, more guided reviews. <a href="https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot" class="Link--inTextBlock" target="_blank" rel="noopener noreferrer">Learn how to get started</a>.
+--
+author:	gemini-code-assist
+association:	none
+edited:	false
+status:	commented
+--
+## Code Review
+
+This pull request is a major and impressive refactoring that turns the extension into a 'dumb actuator', simplifying its logic and improving its architecture. The code is now much more modular, with clear separation of concerns into `DaemonClient`, `TerminalController`, and `ContextCollector`. The introduction of a formal, versioned protocol with `snake_case` and comprehensive BDD/unit tests significantly increases the project's quality and maintainability.
+
+My review includes a few suggestions for improvement:
+- Consistently use the `TerminalController`'s selection logic for all terminal commands.
+- Improve the efficiency of context collection by using file watchers instead of polling.
+- Ensure all user-facing commands are declared in `package.json`.
+- Address the failing test and remove the committed test output file.
+
+Overall, this is a fantastic step forward for the extension.
+--

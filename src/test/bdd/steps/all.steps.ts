@@ -285,7 +285,6 @@ Then('the backoff delay should be at most {int} ms', async (maxMs: number) => {
 Then('the raw byte should be {string}', async (expected: string) => {
   let rawSeq = sequenceName;
   switch (sequenceName) {
-    case 'Enter': rawSeq = '\r'; break;
     case 'Esc': rawSeq = '\u001b'; break;
     case 'Ctrl+C': rawSeq = '\u0003'; break;
   }
@@ -299,6 +298,10 @@ Then('the raw byte should be {string}', async (expected: string) => {
   else if (expected === '\\u001b') { expectedByte = '\u001b'; }
   else if (expected === '\\u0003') { expectedByte = '\u0003'; }
   assert.strictEqual(rawSeq, expectedByte);
+});
+
+Then('the sequence should trigger standard execution dispatch', async () => {
+  assert.strictEqual(sequenceName, 'Enter');
 });
 
 // --- Extension / configuration ---

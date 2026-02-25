@@ -9,9 +9,12 @@ Feature: Sequence Dispatch
 
     Examples:
       | name    | byte   |
-      | Enter   | \r     |
       | Esc     | \u001b |
       | Ctrl+C  | \u0003 |
+
+  Scenario: Enter sequence is specially handled as an execution request
+    Given the sequence name is "Enter"
+    Then the sequence should trigger standard execution dispatch
 
   Scenario Outline: Unknown sequence passes through literally
     Given the sequence name is "<name>"

@@ -93,6 +93,8 @@ export class DaemonClient extends EventEmitter {
       this.reconnectTimer = null;
     }
     if (this.ws) {
+      this.ws.removeAllListeners('close');
+      this.ws.removeAllListeners('error');
       this.ws.close();
       this.ws = null;
     }
