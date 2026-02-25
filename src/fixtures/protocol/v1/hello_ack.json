@@ -1,0 +1,5 @@
+{
+  "protocol": 1,
+  "type": "hello_ack",
+  "capabilities_required_ok": true
+}

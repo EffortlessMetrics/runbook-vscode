@@ -7,15 +7,24 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:runbook.connect",
-    "onCommand:runbook.disconnect",
-    "onCommand:runbook.dispatchTest"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Runbook",
+      "properties": {
+        "runbook.daemonUrl": {
+          "type": "string",
+          "default": "ws://127.0.0.1:29381/ws",
+          "description": "WebSocket URL for the Runbook daemon."
+        }
+      }
+    },
     "commands": [
       {
         "command": "runbook.connect",
@@ -34,11 +43,21 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "package": "vsce package",
+    "pretest": "npm run compile",
+    "test": "node ./dist/test/runTest.js",
+    "test:bdd": "npm run compile && node ./dist/test/runBdd.js"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^12.6.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.18.1",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^13.0.6",
+    "mocha": "^11.7.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {

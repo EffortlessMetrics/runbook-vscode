@@ -1,0 +1,15 @@
+{
+  "protocol": 1,
+  "type": "vscode_telemetry",
+  "workspace_path": "/home/user/project",
+  "git_branch": "main",
+  "active_terminal_index": 0,
+  "selected_terminal_index": 0,
+  "terminals_count": 1,
+  "terminals": [
+    {
+      "name": "Claude",
+      "session_tag": "550e8400-e29b-41d4-a716-446655440000"
+    }
+  ]
+}

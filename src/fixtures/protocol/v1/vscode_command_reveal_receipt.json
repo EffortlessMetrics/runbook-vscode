@@ -1,0 +1,8 @@
+{
+  "protocol": 1,
+  "type": "vscode_command",
+  "cmd": "reveal_receipt",
+  "payload": {
+    "path": "/tmp/runbook/receipts/test.md"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "protocol": 1,
+  "type": "hook_event",
+  "hook_event_name": "PreToolUse",
+  "session_id": "sess-ab12cd34",
+  "session_tag": "550e8400-e29b-41d4-a716-446655440000",
+  "tool_name": "RunCommand",
+  "tool_input": {
+    "command": "rm -rf /"
+  }
+}

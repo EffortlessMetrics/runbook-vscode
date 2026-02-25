@@ -1,0 +1,9 @@
+{
+  "protocol": 1,
+  "type": "vscode_command",
+  "cmd": "send_text",
+  "payload": {
+    "text": "echo 'Hello World'",
+    "execute": true
+  }
+}
