@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
             throw new Error(`No step definition found for: "${step.keyword} ${step.text}"`);
           }
           // Convert {int} captures from string to number
-          const args = match.args.map(a => /^\d+$/.test(a) ? parseInt(a, 10) : a);
+          const args = match.args.map(a => /^-?\d+$/.test(a) ? parseInt(a, 10) : a);
           await match.fn(...args);
         }
       }));

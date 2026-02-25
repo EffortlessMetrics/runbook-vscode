@@ -3,6 +3,8 @@ import * as path from 'path';
 
 // ---------------------------------------------------------------------------
 // Lightweight Gherkin parser — no external deps, runs inside extension host
+// Supports: Feature, Background, Scenario, Scenario Outline + Examples,
+//           Given/When/Then/And/But, # comments
 // ---------------------------------------------------------------------------
 
 export interface GherkinScenario {
@@ -24,6 +26,8 @@ export interface GherkinStep {
 const STEP_KW = /^\s*(Given|When|Then|And|But)\s+(.+)$/;
 const FEATURE_KW = /^\s*Feature:\s*(.+)$/;
 const SCENARIO_KW = /^\s*Scenario:\s*(.+)$/;
+const OUTLINE_KW = /^\s*Scenario Outline:\s*(.+)$/;
+const EXAMPLES_KW = /^\s*Examples:\s*$/;
 
 export function parseFeatureFile(filePath: string): GherkinFeature {
   const raw = fs.readFileSync(filePath, 'utf-8');
@@ -39,33 +43,103 @@ export function parseFeatureText(text: string): GherkinFeature {
   let backgroundSteps: GherkinStep[] = [];
   let inBackground = false;
 
-  for (const line of lines) {
-    // Skip comments
-    if (line.trim().startsWith('#')) { continue; }
+  // Scenario Outline state
+  let outlineName = '';
+  let outlineSteps: GherkinStep[] = [];
+  let inOutline = false;
+  let inExamples = false;
+  let exampleHeaders: string[] = [];
 
+  function flushOutline() {
+    // nothing to flush if no outline
+    outlineName = '';
+    outlineSteps = [];
+    inOutline = false;
+    inExamples = false;
+    exampleHeaders = [];
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Skip comments and empty lines in examples context
+    if (trimmed.startsWith('#')) { continue; }
+
+    // --- Feature ---
     const featureMatch = line.match(FEATURE_KW);
     if (featureMatch) {
       featureName = featureMatch[1].trim();
       inBackground = false;
+      flushOutline();
       continue;
     }
 
-    // Background: — steps here are prepended to every Scenario
+    // --- Background ---
     const backgroundMatch = line.match(/^\s*Background:\s*(.*)$/);
     if (backgroundMatch) {
       inBackground = true;
+      inOutline = false;
+      inExamples = false;
       current = null;
       continue;
     }
 
+    // --- Scenario Outline ---
+    const outlineMatch = line.match(OUTLINE_KW);
+    if (outlineMatch) {
+      inBackground = false;
+      inOutline = true;
+      inExamples = false;
+      outlineName = outlineMatch[1].trim();
+      outlineSteps = [];
+      current = null;
+      continue;
+    }
+
+    // --- Examples: (table header + rows) ---
+    if (EXAMPLES_KW.test(line)) {
+      inExamples = true;
+      exampleHeaders = [];
+      continue;
+    }
+
+    // --- Table rows under Examples ---
+    if (inExamples && trimmed.startsWith('|')) {
+      const cells = trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0);
+      if (exampleHeaders.length === 0) {
+        exampleHeaders = cells;
+      } else {
+        // Instantiate a scenario from the outline
+        const row: Record<string, string> = {};
+        cells.forEach((val, i) => { row[exampleHeaders[i]] = val; });
+        const expandedSteps = outlineSteps.map(s => ({
+          keyword: s.keyword,
+          text: s.text.replace(/<([^>]+)>/g, (_, key) => row[key] ?? `<${key}>`)
+        }));
+        const scenarioName = outlineName.replace(/<([^>]+)>/g, (_, key) => row[key] ?? `<${key}>`);
+        scenarios.push({
+          name: scenarioName,
+          steps: [...backgroundSteps, ...expandedSteps]
+        });
+      }
+      continue;
+    }
+
+    // If we encounter a new Scenario / Scenario Outline, end examples parsing
+    if (inExamples && !trimmed.startsWith('|') && trimmed.length > 0) {
+      inExamples = false;
+    }
+
+    // --- Regular Scenario ---
     const scenarioMatch = line.match(SCENARIO_KW);
     if (scenarioMatch) {
+      flushOutline();
       inBackground = false;
       current = { name: scenarioMatch[1].trim(), steps: [...backgroundSteps] };
       scenarios.push(current);
       continue;
     }
 
+    // --- Step lines ---
     const stepMatch = line.match(STEP_KW);
     if (stepMatch) {
       const step: GherkinStep = {
@@ -75,6 +149,8 @@ export function parseFeatureText(text: string): GherkinFeature {
 
       if (inBackground) {
         backgroundSteps.push(step);
+      } else if (inOutline && !inExamples) {
+        outlineSteps.push(step);
       } else if (current) {
         current.steps.push(step);
       }
@@ -82,8 +158,8 @@ export function parseFeatureText(text: string): GherkinFeature {
     }
 
     // Collect description lines between Feature and first Scenario/Background
-    if (featureName && !current && !inBackground && line.trim()) {
-      descLines.push(line.trim());
+    if (featureName && !current && !inBackground && !inOutline && trimmed) {
+      descLines.push(trimmed);
     }
   }
 
@@ -111,8 +187,8 @@ function patternToRegex(pattern: string): RegExp {
   // Convert Cucumber-style {string}, {int}, {float} to capture groups
   let regexStr = escapeRegex(pattern);
   regexStr = regexStr.replace(/\\{string\\}/g, '"([^"]*)"');
-  regexStr = regexStr.replace(/\\{int\\}/g, '(\\d+)');
-  regexStr = regexStr.replace(/\\{float\\}/g, '([\\d.]+)');
+  regexStr = regexStr.replace(/\\{int\\}/g, '(-?\\d+)');
+  regexStr = regexStr.replace(/\\{float\\}/g, '(-?[\\d.]+)');
   return new RegExp('^' + regexStr + '$');
 }
 
@@ -129,7 +205,6 @@ export function Then(pattern: string, fn: StepFn) {
 }
 
 export function After(fn: () => Promise<void> | void) {
-  // Store afterHooks separately
   afterHooks.push(fn);
 }
 
