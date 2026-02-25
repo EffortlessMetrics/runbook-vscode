@@ -11,6 +11,9 @@ export interface ClientHello {
   type: 'hello';
   role: 'vscode';
   version?: string;
+  capabilities?: {
+    start_session: boolean;
+  };
 }
 
 export interface VscodeTelemetry {

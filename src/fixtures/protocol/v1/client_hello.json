@@ -2,5 +2,8 @@
   "protocol": 1,
   "type": "hello",
   "role": "vscode",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "capabilities": {
+    "start_session": true
+  }
 }

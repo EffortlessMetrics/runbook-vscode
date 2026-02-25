@@ -44,7 +44,10 @@ export class DaemonClient extends EventEmitter {
         protocol: 1,
         type: 'hello',
         role: 'vscode',
-        version: this.ctx.extension.packageJSON.version
+        version: this.ctx.extension.packageJSON.version,
+        capabilities: {
+          start_session: true
+        }
       };
       this.send(hello);
     });
