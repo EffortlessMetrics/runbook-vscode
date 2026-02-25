@@ -14,8 +14,8 @@ Feature: Protocol Fidelity
   Scenario: VscodeCommand round-trips for send_sequence
     Then a vscode_command with cmd "send_sequence" and sequence "Ctrl+C" should round-trip correctly
 
-  Scenario: Context update preserves snake_case
-    Then a context_update with workspace "/home/user" and branch "main" should round-trip in snake_case
+  Scenario: VS Code telemetry preserves snake_case
+    Then a vscode_telemetry with workspace "/home/user" and branch "main" should round-trip in snake_case
 
   Scenario: Unknown message types do not crash
     Then parsing a message with type "future_event" should not throw

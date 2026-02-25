@@ -1,0 +1,10 @@
+{
+  "protocol": 1,
+  "type": "render",
+  "pending_prompt": {
+    "prompt_id": "prompt-12345",
+    "label": "Execute git commit",
+    "text": "git commit -m 'Initial commit'"
+  },
+  "agent_state": "idle"
+}

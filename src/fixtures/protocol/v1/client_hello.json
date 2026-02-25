@@ -1,0 +1,6 @@
+{
+  "protocol": 1,
+  "type": "hello",
+  "role": "vscode",
+  "version": "0.1.0"
+}

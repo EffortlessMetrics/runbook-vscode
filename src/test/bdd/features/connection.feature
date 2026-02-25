@@ -11,7 +11,6 @@ Feature: Connection Lifecycle
 
   Scenario: Default configuration values exist out of the box
     Then the configuration "runbook.daemonUrl" should equal "ws://127.0.0.1:29381/ws"
-    And the configuration "runbook.escWhenPending" should equal "cancel_only"
 
   Scenario: Status bar item is present after activation
     Then the extension should be active

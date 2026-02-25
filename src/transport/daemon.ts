@@ -38,8 +38,7 @@ export class DaemonClient extends EventEmitter {
     this.ws = ws;
 
     ws.on('open', () => {
-      this.status.text = '$(plug) Runbook: connected';
-      this.backoffMs = 1000; // reset backoff
+      this.status.text = '$(sync~spin) Runbook: handshaking…';
 
       const hello: ClientHello = {
         protocol: 1,
@@ -48,7 +47,6 @@ export class DaemonClient extends EventEmitter {
         version: this.ctx.extension.packageJSON.version
       };
       this.send(hello);
-      this.emit('connected');
     });
 
     ws.on('message', async (data) => {
@@ -59,6 +57,14 @@ export class DaemonClient extends EventEmitter {
       } catch {
         return;
       }
+
+      if (msg.type === 'hello_ack') {
+        this.status.text = '$(plug) Runbook: connected';
+        this.backoffMs = 1000; // reset backoff
+        this.emit('connected');
+        return;
+      }
+
       this.emit('message', msg);
     });
 

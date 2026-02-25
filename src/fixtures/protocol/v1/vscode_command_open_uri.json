@@ -1,0 +1,8 @@
+{
+  "protocol": 1,
+  "type": "vscode_command",
+  "cmd": "open_uri",
+  "payload": {
+    "uri": "https://github.com/EffortlessMetrics"
+  }
+}

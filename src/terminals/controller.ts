@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
+import * as crypto from 'crypto';
 import { DaemonClient } from '../transport/daemon';
 
 export class TerminalController {
   private selectedTerminalIndex: number = -1;
+  private sessionTags = new Map<vscode.Terminal, string>();
 
   constructor(private readonly client: DaemonClient) {
     // Listen for terminal selection updates from user to sync selected index
@@ -19,7 +21,10 @@ export class TerminalController {
 
     // Listen for terminal opens/closes
     vscode.window.onDidOpenTerminal(() => this.reportTelemetry());
-    vscode.window.onDidCloseTerminal(() => this.reportTelemetry());
+    vscode.window.onDidCloseTerminal((term) => {
+      this.sessionTags.delete(term);
+      this.reportTelemetry();
+    });
 
     // Initialize telemetry
     this.reportTelemetry();
@@ -93,7 +98,10 @@ export class TerminalController {
 
     let rawSeq = sequence;
     switch (sequence) {
-      case 'Enter': rawSeq = '\r'; break;
+      case 'Enter':
+        // Prefer newline via sendText for reliability vs raw \r
+        term.sendText('', true);
+        return;
       case 'Esc': rawSeq = '\u001b'; break;
       case 'Ctrl+C': rawSeq = '\u0003'; break;
     }
@@ -103,11 +111,30 @@ export class TerminalController {
   }
 
   public reportTelemetry() {
+    const terminalsData = vscode.window.terminals.map(t => ({
+      name: t.name,
+      session_tag: this.sessionTags.get(t) || undefined
+    }));
+
     this.client.send({
       protocol: 1,
-      type: 'context_update',
+      type: 'vscode_telemetry',
       active_terminal_index: this.selectedTerminalIndex,
-      terminals_count: vscode.window.terminals.length
+      selected_terminal_index: this.selectedTerminalIndex,
+      terminals_count: terminalsData.length,
+      terminals: terminalsData
     });
+  }
+
+  public startClaudeSession() {
+    const uuid = crypto.randomUUID();
+    const term = vscode.window.createTerminal({
+      name: 'Claude',
+      env: { RUNBOOK_SESSION_TAG: uuid }
+    });
+    this.sessionTags.set(term, uuid);
+    term.show();
+    term.sendText('claude', true);
+    this.reportTelemetry();
   }
 }

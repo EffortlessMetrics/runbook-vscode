@@ -13,13 +13,20 @@ export interface ClientHello {
   version?: string;
 }
 
-export interface ContextUpdate {
+export interface VscodeTelemetry {
   protocol: number;
-  type: 'context_update';
+  type: 'vscode_telemetry';
   workspace_path?: string;
   git_branch?: string;
   active_terminal_index?: number;
+  selected_terminal_index?: number;
   terminals_count?: number;
+  terminals?: TerminalInfo[];
+}
+
+export interface TerminalInfo {
+  name: string;
+  session_tag?: string;
 }
 
 // --- Daemon → Extension ---
@@ -33,7 +40,8 @@ export interface VscodeCommand {
     | 'focus_terminal'   // payload: { index }
     | 'cycle_terminal'   // payload: { direction: 1 | -1 }
     | 'open_uri'         // payload: { uri }
-    | 'reveal_receipt';  // payload: { path }
+    | 'reveal_receipt'   // payload: { path }
+    | 'start_claude_session'; // payload: {}
   payload?: any;
 }
 

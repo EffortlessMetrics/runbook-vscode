@@ -52,6 +52,10 @@ export function activate(context: vscode.ExtensionContext) {
           case 'reveal_receipt':
             await revealReceipt(payload.path);
             break;
+
+          case 'start_claude_session':
+            terminals?.startClaudeSession();
+            break;
         }
         break;
       }
@@ -64,6 +68,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('runbook.disconnect', () => client?.disconnect()),
     vscode.commands.registerCommand('runbook.dispatchTest', () => {
       terminals?.sendText('echo "Test dispatch"', true);
+    }),
+    vscode.commands.registerCommand('runbook.startClaudeSession', () => {
+      terminals?.startClaudeSession();
     })
   );
 

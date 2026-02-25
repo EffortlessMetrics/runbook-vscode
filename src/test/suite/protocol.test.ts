@@ -130,10 +130,10 @@ suite('Protocol Tests', () => {
     assert.strictEqual(parsed.payload.path, '/tmp/receipts/latest.md');
   });
 
-  test('Context telemetry message round-trip', () => {
+  test('VS Code telemetry message round-trip', () => {
     const telemetry = {
       protocol: 1,
-      type: 'context_update',
+      type: 'vscode_telemetry',
       workspace_path: '/home/user/project',
       git_branch: 'feat/runbook',
       active_terminal_index: 0,
@@ -143,7 +143,7 @@ suite('Protocol Tests', () => {
     const json = JSON.stringify(telemetry);
     const parsed = JSON.parse(json);
 
-    assert.strictEqual(parsed.type, 'context_update');
+    assert.strictEqual(parsed.type, 'vscode_telemetry');
     assert.strictEqual(parsed.workspace_path, '/home/user/project');
     assert.strictEqual(parsed.git_branch, 'feat/runbook');
     assert.strictEqual(parsed.active_terminal_index, 0);

@@ -1,0 +1,6 @@
+{
+  "protocol": 1,
+  "type": "vscode_command",
+  "cmd": "start_claude_session",
+  "payload": {}
+}

@@ -47,7 +47,7 @@ export class ContextCollector {
   public reportTelemetry() {
     this.client.send({
       protocol: 1,
-      type: 'context_update',
+      type: 'vscode_telemetry',
       workspace_path: this.workspacePath,
       git_branch: this.gitBranch
     });

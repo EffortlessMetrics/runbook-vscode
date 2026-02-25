@@ -326,6 +326,13 @@ Then('the configuration {string} should equal {string}', async (key: string, exp
   assert.strictEqual(value, expected, `Config "${key}" should be "${expected}"`);
 });
 
+Then('Default configuration values exist out of the box', async function () {
+  const config = vscode.workspace.getConfiguration('runbook');
+  const wsUrl = config.get<string>('daemonUrl');
+
+  assert.strictEqual(wsUrl, 'ws://127.0.0.1:29381/ws', 'Config "runbook.daemonUrl" should be default WS URL');
+});
+
 Then('the status bar should exist', async () => {
   const ext = vscode.extensions.getExtension('runbook-rs.runbook-vscode');
   assert.ok(ext?.isActive, 'Extension must be active to have a status bar');
@@ -395,8 +402,8 @@ Then('a vscode_command with cmd {string} and sequence {string} should round-trip
   assert.strictEqual(parsed.payload.sequence, sequence);
 });
 
-Then('a context_update with workspace {string} and branch {string} should round-trip in snake_case', async (workspace: string, branch: string) => {
-  const msg = { protocol: 1, type: 'context_update', workspace_path: workspace, git_branch: branch };
+Then('a vscode_telemetry with workspace {string} and branch {string} should round-trip in snake_case', async (workspace: string, branch: string) => {
+  const msg = { protocol: 1, type: 'vscode_telemetry', workspace_path: workspace, git_branch: branch };
   const parsed = JSON.parse(JSON.stringify(msg));
   assert.strictEqual(parsed.workspace_path, workspace);
   assert.strictEqual(parsed.git_branch, branch);
