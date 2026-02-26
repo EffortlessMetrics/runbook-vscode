@@ -61,6 +61,11 @@ export class DaemonClient extends EventEmitter {
         return;
       }
 
+      // Defend against null, arrays, and non-object JSON values (e.g. JSON.parse("null"))
+      if (!msg || typeof msg !== 'object' || Array.isArray(msg)) {
+        return;
+      }
+
       if (msg.type === 'hello_ack') {
         this.status.text = '$(plug) Runbook: connected';
         this.backoffMs = 1000; // reset backoff

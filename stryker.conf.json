@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "mutator": "typescript",
+  "packageManager": "npm",
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress"
+  ],
+  "testRunner": "mocha",
+  "mochaOptions": {
+    "spec": [
+      "out/test/suite/cycling.test.js",
+      "out/test/suite/fuzzing.test.js"
+    ]
+  },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/terminals/controller.ts",
+    "src/transport/daemon.ts"
+  ]
+}

@@ -53,11 +53,7 @@ export class TerminalController {
     const terminals = vscode.window.terminals;
     if (terminals.length === 0) return;
 
-    if (this.selectedTerminalIndex < 0 || this.selectedTerminalIndex >= terminals.length) {
-      this.selectedTerminalIndex = 0;
-    }
-
-    this.selectedTerminalIndex = (this.selectedTerminalIndex + delta + terminals.length) % terminals.length;
+    this.selectedTerminalIndex = calculateCycleIndex(this.selectedTerminalIndex, delta, terminals.length);
     
     const target = terminals[this.selectedTerminalIndex];
     if (target) {
@@ -137,4 +133,13 @@ export class TerminalController {
     term.sendText('claude', true);
     this.reportTelemetry();
   }
+}
+
+export function calculateCycleIndex(currentIndex: number, delta: number, length: number): number {
+  if (length === 0) return 0;
+  if (currentIndex < 0 || currentIndex >= length) {
+    currentIndex = 0;
+  }
+  // True mathematical modulo to handle extremely negative deltas properly
+  return ((currentIndex + delta) % length + length) % length;
 }
