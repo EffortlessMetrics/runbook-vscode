@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { DaemonClient } from './transport/daemon';
 import { TerminalController } from './terminals/controller';
 import { openUri, revealReceipt } from './jumpgates';
+import { dispatchVscodeCommand } from './dispatch/commandDispatcher';
 import { ContextCollector } from './context';
 import { VscodeCommand, DaemonMessage } from './protocol';
 
@@ -19,44 +20,14 @@ export function activate(context: vscode.ExtensionContext) {
   client.on('message', async (msg: DaemonMessage) => {
     switch (msg.type) {
       case 'vscode_command': {
-        const command = msg as VscodeCommand;
-        const payload = command.payload || {};
-
-        switch (command.cmd) {
-          case 'send_text':
-            terminals?.sendText(payload.text || '', payload.execute !== false);
-            break;
-
-          case 'send_sequence': {
-            const { sequence } = payload;
-            const term = vscode.window.activeTerminal;
-            if (term) {
-              term.show(false);
-              await terminals?.sendSequence(sequence); // Simplified: just pass through
-            }
-            break;
-          }
-
-          case 'focus_terminal':
-            terminals?.focusTerminal(payload.index || 0);
-            break;
-
-          case 'cycle_terminal':
-            terminals?.cycleTerminal(payload.direction || 1);
-            break;
-
-          case 'open_uri':
-            await openUri(payload.uri);
-            break;
-
-          case 'reveal_receipt':
-            await revealReceipt(payload.path);
-            break;
-
-          case 'start_claude_session':
-            terminals?.startClaudeSession();
-            break;
+        if (!terminals) {
+          break;
         }
+
+        await dispatchVscodeCommand(msg as VscodeCommand, {
+          terminals,
+          jumpgates: { openUri, revealReceipt }
+        });
         break;
       }
     }
