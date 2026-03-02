@@ -1,0 +1,1 @@
+export { dispatchVscodeCommand } from './dispatcher';
