@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { DaemonClient } from '../transport/daemon';
+import { cycleSelectedTerminalIndex, isTerminalIndexInRange, resolveSelectedTerminalIndex } from './selection';
+import { TerminalSequence, toSequenceDispatch } from './sequences';
 
 export class TerminalController {
   private selectedTerminalIndex: number = -1;
@@ -32,34 +34,22 @@ export class TerminalController {
 
   public getSelectedTerminal(): vscode.Terminal | undefined {
     const terminals = vscode.window.terminals;
-    if (terminals.length === 0) return undefined;
+    const activeIndex = vscode.window.activeTerminal ? terminals.indexOf(vscode.window.activeTerminal) : undefined;
 
-    if (this.selectedTerminalIndex >= 0 && this.selectedTerminalIndex < terminals.length) {
-      return terminals[this.selectedTerminalIndex];
-    }
-    
-    // Fallback to active terminal or the first one
-    const active = vscode.window.activeTerminal;
-    if (active) {
-      this.selectedTerminalIndex = terminals.indexOf(active);
-      return active;
-    }
+    this.selectedTerminalIndex = resolveSelectedTerminalIndex(
+      this.selectedTerminalIndex,
+      terminals.length,
+      activeIndex
+    );
 
-    this.selectedTerminalIndex = 0;
-    return terminals[0];
+    return this.selectedTerminalIndex === -1 ? undefined : terminals[this.selectedTerminalIndex];
   }
 
   public cycleTerminal(delta: number) {
     const terminals = vscode.window.terminals;
-    if (terminals.length === 0) return;
+    this.selectedTerminalIndex = cycleSelectedTerminalIndex(this.selectedTerminalIndex, terminals.length, delta);
 
-    if (this.selectedTerminalIndex < 0 || this.selectedTerminalIndex >= terminals.length) {
-      this.selectedTerminalIndex = 0;
-    }
-
-    this.selectedTerminalIndex = (this.selectedTerminalIndex + delta + terminals.length) % terminals.length;
-    
-    const target = terminals[this.selectedTerminalIndex];
+    const target = this.selectedTerminalIndex === -1 ? undefined : terminals[this.selectedTerminalIndex];
     if (target) {
       target.show(false);
       this.reportTelemetry();
@@ -68,9 +58,8 @@ export class TerminalController {
 
   public focusTerminal(index: number) {
     const terminals = vscode.window.terminals;
-    if (terminals.length === 0) return;
 
-    if (index >= 0 && index < terminals.length) {
+    if (isTerminalIndexInRange(index, terminals.length)) {
       this.selectedTerminalIndex = index;
       terminals[index].show(false);
       this.reportTelemetry();
@@ -87,7 +76,7 @@ export class TerminalController {
     }
   }
 
-  public async sendSequence(sequence: 'Enter' | 'Esc' | 'Ctrl+C' | string) {
+  public async sendSequence(sequence: TerminalSequence) {
     const term = this.getSelectedTerminal();
     if (!term) {
       vscode.window.showWarningMessage('Runbook: No terminal available for sequence.');
@@ -96,18 +85,8 @@ export class TerminalController {
 
     term.show(false);
 
-    let rawSeq = sequence;
-    switch (sequence) {
-      case 'Enter':
-        // Prefer newline via sendText for reliability vs raw \r
-        term.sendText('', true);
-        return;
-      case 'Esc': rawSeq = '\u001b'; break;
-      case 'Ctrl+C': rawSeq = '\u0003'; break;
-    }
-
-    // Try sending sequence via sendText.
-    term.sendText(rawSeq, false);
+    const dispatch = toSequenceDispatch(sequence);
+    term.sendText(dispatch.text, dispatch.execute);
   }
 
   public reportTelemetry() {
