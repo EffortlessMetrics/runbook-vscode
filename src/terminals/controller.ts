@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { DaemonClient } from '../transport/daemon';
+import { cycleTerminalIndex, resolveSelectedTerminalIndex } from './selection';
 
 export class TerminalController {
   private selectedTerminalIndex: number = -1;
@@ -32,32 +33,27 @@ export class TerminalController {
 
   public getSelectedTerminal(): vscode.Terminal | undefined {
     const terminals = vscode.window.terminals;
-    if (terminals.length === 0) return undefined;
+    const activeTerminal = vscode.window.activeTerminal;
+    const activeTerminalIndex = activeTerminal ? terminals.indexOf(activeTerminal) : -1;
 
-    if (this.selectedTerminalIndex >= 0 && this.selectedTerminalIndex < terminals.length) {
-      return terminals[this.selectedTerminalIndex];
-    }
-    
-    // Fallback to active terminal or the first one
-    const active = vscode.window.activeTerminal;
-    if (active) {
-      this.selectedTerminalIndex = terminals.indexOf(active);
-      return active;
+    this.selectedTerminalIndex = resolveSelectedTerminalIndex({
+      terminalCount: terminals.length,
+      selectedTerminalIndex: this.selectedTerminalIndex,
+      activeTerminalIndex
+    });
+
+    if (this.selectedTerminalIndex < 0) {
+      return undefined;
     }
 
-    this.selectedTerminalIndex = 0;
-    return terminals[0];
+    return terminals[this.selectedTerminalIndex];
   }
 
   public cycleTerminal(delta: number) {
     const terminals = vscode.window.terminals;
     if (terminals.length === 0) return;
 
-    if (this.selectedTerminalIndex < 0 || this.selectedTerminalIndex >= terminals.length) {
-      this.selectedTerminalIndex = 0;
-    }
-
-    this.selectedTerminalIndex = (this.selectedTerminalIndex + delta + terminals.length) % terminals.length;
+    this.selectedTerminalIndex = cycleTerminalIndex(this.selectedTerminalIndex, terminals.length, delta);
     
     const target = terminals[this.selectedTerminalIndex];
     if (target) {
