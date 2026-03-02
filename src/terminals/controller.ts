@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { DaemonClient } from '../transport/daemon';
+import { encodeTerminalSequence } from './sequenceCodec';
+import { buildTerminalTelemetry } from './telemetryBuilder';
 
 export class TerminalController {
   private selectedTerminalIndex: number = -1;
@@ -87,7 +89,7 @@ export class TerminalController {
     }
   }
 
-  public async sendSequence(sequence: 'Enter' | 'Esc' | 'Ctrl+C' | string) {
+  public async sendSequence(sequence: string) {
     const term = this.getSelectedTerminal();
     if (!term) {
       vscode.window.showWarningMessage('Runbook: No terminal available for sequence.');
@@ -96,34 +98,17 @@ export class TerminalController {
 
     term.show(false);
 
-    let rawSeq = sequence;
-    switch (sequence) {
-      case 'Enter':
-        // Prefer newline via sendText for reliability vs raw \r
-        term.sendText('', true);
-        return;
-      case 'Esc': rawSeq = '\u001b'; break;
-      case 'Ctrl+C': rawSeq = '\u0003'; break;
-    }
-
-    // Try sending sequence via sendText.
-    term.sendText(rawSeq, false);
+    const encoded = encodeTerminalSequence(sequence);
+    term.sendText(encoded.text, encoded.execute);
   }
 
   public reportTelemetry() {
-    const terminalsData = vscode.window.terminals.map(t => ({
-      name: t.name,
-      session_tag: this.sessionTags.get(t) || undefined
-    }));
-
-    this.client.send({
-      protocol: 1,
-      type: 'vscode_telemetry',
-      active_terminal_index: this.selectedTerminalIndex,
-      selected_terminal_index: this.selectedTerminalIndex,
-      terminals_count: terminalsData.length,
-      terminals: terminalsData
-    });
+    const telemetry = buildTerminalTelemetry(
+      vscode.window.terminals,
+      this.sessionTags,
+      this.selectedTerminalIndex
+    );
+    this.client.send(telemetry);
   }
 
   public startClaudeSession() {
