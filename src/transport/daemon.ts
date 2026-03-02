@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import WebSocket from 'ws';
-import { ClientHello, DaemonMessage } from '../protocol';
+import { DaemonMessage } from '../protocol';
+import { buildClientHello, parseDaemonMessage } from './clientProtocol';
+import { ReconnectPolicy } from './reconnectPolicy';
 import { EventEmitter } from 'events';
 
 export class DaemonClient extends EventEmitter {
@@ -8,8 +10,7 @@ export class DaemonClient extends EventEmitter {
   private status: vscode.StatusBarItem;
   private url: string;
   private reconnectTimer: NodeJS.Timeout | null = null;
-  private backoffMs = 1000;
-  private readonly maxBackoffMs = 30000;
+  private readonly reconnectPolicy = new ReconnectPolicy();
 
   constructor(private readonly ctx: vscode.ExtensionContext) {
     super();
@@ -40,30 +41,19 @@ export class DaemonClient extends EventEmitter {
     ws.on('open', () => {
       this.status.text = '$(sync~spin) Runbook: handshaking…';
 
-      const hello: ClientHello = {
-        protocol: 1,
-        type: 'hello',
-        role: 'vscode',
-        version: this.ctx.extension.packageJSON.version,
-        capabilities: {
-          start_session: true
-        }
-      };
-      this.send(hello);
+      this.send(buildClientHello(this.ctx.extension.packageJSON.version));
     });
 
     ws.on('message', async (data) => {
       const text = data.toString();
-      let msg: DaemonMessage;
-      try {
-        msg = JSON.parse(text) as DaemonMessage;
-      } catch {
+      const msg = parseDaemonMessage(text);
+      if (!msg) {
         return;
       }
 
       if (msg.type === 'hello_ack') {
         this.status.text = '$(plug) Runbook: connected';
-        this.backoffMs = 1000; // reset backoff
+        this.reconnectPolicy.reset();
         this.emit('connected');
         return;
       }
@@ -115,12 +105,12 @@ export class DaemonClient extends EventEmitter {
     if (this.reconnectTimer) {
       return;
     }
-    this.status.text = `$(sync) Runbook: reconnecting in ${this.backoffMs / 1000}s`;
+    const delayMs = this.reconnectPolicy.consumeDelayMs();
+    this.status.text = `$(sync) Runbook: reconnecting in ${delayMs / 1000}s`;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.backoffMs = Math.min(this.backoffMs * 1.5, this.maxBackoffMs);
       this.connect();
-    }, this.backoffMs);
+    }, delayMs);
   }
 
   public dispose() {
