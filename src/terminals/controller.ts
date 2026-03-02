@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { DaemonClient } from '../transport/daemon';
+import { resolveTerminalSequence } from './sequence';
 
 export class TerminalController {
   private selectedTerminalIndex: number = -1;
@@ -96,18 +97,8 @@ export class TerminalController {
 
     term.show(false);
 
-    let rawSeq = sequence;
-    switch (sequence) {
-      case 'Enter':
-        // Prefer newline via sendText for reliability vs raw \r
-        term.sendText('', true);
-        return;
-      case 'Esc': rawSeq = '\u001b'; break;
-      case 'Ctrl+C': rawSeq = '\u0003'; break;
-    }
-
-    // Try sending sequence via sendText.
-    term.sendText(rawSeq, false);
+    const resolved = resolveTerminalSequence(sequence);
+    term.sendText(resolved.text, resolved.execute);
   }
 
   public reportTelemetry() {
