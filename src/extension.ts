@@ -4,6 +4,7 @@ import { TerminalController } from './terminals/controller';
 import { openUri, revealReceipt } from './jumpgates';
 import { ContextCollector } from './context';
 import { VscodeCommand, DaemonMessage } from './protocol';
+import { dispatchVscodeCommand } from './commands/dispatcher';
 
 let client: DaemonClient | null = null;
 let terminals: TerminalController | null = null;
@@ -20,43 +21,21 @@ export function activate(context: vscode.ExtensionContext) {
     switch (msg.type) {
       case 'vscode_command': {
         const command = msg as VscodeCommand;
-        const payload = command.payload || {};
-
-        switch (command.cmd) {
-          case 'send_text':
-            terminals?.sendText(payload.text || '', payload.execute !== false);
-            break;
-
-          case 'send_sequence': {
-            const { sequence } = payload;
+        await dispatchVscodeCommand(command, {
+          sendText: (text, execute) => terminals?.sendText(text, execute),
+          sendSequence: async (sequence) => {
             const term = vscode.window.activeTerminal;
             if (term) {
               term.show(false);
-              await terminals?.sendSequence(sequence); // Simplified: just pass through
+              await terminals?.sendSequence(sequence);
             }
-            break;
-          }
-
-          case 'focus_terminal':
-            terminals?.focusTerminal(payload.index || 0);
-            break;
-
-          case 'cycle_terminal':
-            terminals?.cycleTerminal(payload.direction || 1);
-            break;
-
-          case 'open_uri':
-            await openUri(payload.uri);
-            break;
-
-          case 'reveal_receipt':
-            await revealReceipt(payload.path);
-            break;
-
-          case 'start_claude_session':
-            terminals?.startClaudeSession();
-            break;
-        }
+          },
+          focusTerminal: (index) => terminals?.focusTerminal(index),
+          cycleTerminal: (direction) => terminals?.cycleTerminal(direction),
+          openUri,
+          revealReceipt,
+          startClaudeSession: () => terminals?.startClaudeSession()
+        });
         break;
       }
     }
