@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import WebSocket from 'ws';
 import { ClientHello, DaemonMessage } from '../protocol';
 import { EventEmitter } from 'events';
+import { ReconnectBackoff } from './reconnectBackoff';
 
 export class DaemonClient extends EventEmitter {
   private ws: WebSocket | null = null;
   private status: vscode.StatusBarItem;
   private url: string;
   private reconnectTimer: NodeJS.Timeout | null = null;
-  private backoffMs = 1000;
-  private readonly maxBackoffMs = 30000;
+  private readonly reconnectBackoff = new ReconnectBackoff();
 
   constructor(private readonly ctx: vscode.ExtensionContext) {
     super();
@@ -63,7 +63,7 @@ export class DaemonClient extends EventEmitter {
 
       if (msg.type === 'hello_ack') {
         this.status.text = '$(plug) Runbook: connected';
-        this.backoffMs = 1000; // reset backoff
+        this.reconnectBackoff.reset();
         this.emit('connected');
         return;
       }
@@ -115,12 +115,12 @@ export class DaemonClient extends EventEmitter {
     if (this.reconnectTimer) {
       return;
     }
-    this.status.text = `$(sync) Runbook: reconnecting in ${this.backoffMs / 1000}s`;
+    const reconnectPlan = this.reconnectBackoff.next();
+    this.status.text = `$(sync) Runbook: reconnecting in ${reconnectPlan.delayMs / 1000}s`;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.backoffMs = Math.min(this.backoffMs * 1.5, this.maxBackoffMs);
       this.connect();
-    }, this.backoffMs);
+    }, reconnectPlan.delayMs);
   }
 
   public dispose() {
